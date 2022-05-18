@@ -2,6 +2,7 @@ from lexical_analyzer import LexicalAnalyzer, UnknownLexemeException
 from os import environ
 
 
+# For manual testing purposes
 def start_lexical_analyzer(path_to_code: str, path_to_result: str):
     with open(path_to_code, 'r') as f_code, open(path_to_result, 'w') as f_result:
         source = f_code.read()
@@ -16,7 +17,7 @@ def start_lexical_analyzer(path_to_code: str, path_to_result: str):
 
 if __name__ == '__main__':
     path_to_test_files = environ.get('PATHTOTESTFILES')
-    code_filename = 'task_1.txt'
+    code_filename = 'test_code.txt'
     result_filename = 'res_lex.txt'
     start_lexical_analyzer(path_to_test_files + f'\\{code_filename}',
                            path_to_test_files + f'\\results\\{result_filename}')

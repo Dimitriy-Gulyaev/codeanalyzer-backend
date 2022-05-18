@@ -35,10 +35,20 @@ class LexemeType(Enum):
     Xor = 'Xor'
     AndAlso = 'AndAlso'
     OrElse = 'OrElse'
+    # Comparison operators
+    Less = '<'
+    LessOrEqual = '<='
+    Greater = '>'
+    GreaterOrEqual = '>='
+    NotEqual = '<>'
+    Is = 'Is'
+    IsNot = 'IsNot'
+    Like = 'Like'
     # Other operators
-    Assign = '='  # assign with arithmetic operators exists
+    StringConcatenation = '&'
+    Assign = '='  # assign with arithmetic operators exists, also that's equality operator
+    # Service symbols
     Semicolon = ';'
-    DoubleQuote = '"'
     Dot = '.'
     Comma = ','
     OpeningBracket = '('
@@ -46,6 +56,11 @@ class LexemeType(Enum):
     # Dynamic lexemes
     Identifier = '[a-zA-Z_][a-zA-Z0-9_]*'
     Number = '(0|[1-9][0-9]*)'
+    HexadecimalNumber = '&H(0|[a-fA-F1-9][a-fA-F0-9]*)'
+    BinaryNumber = '&B(0|[a-fA-F1-9][a-fA-F0-9]*)'
+    OctalNumber = '&O(0|[a-fA-F1-9][a-fA-F0-9]*)'
+    StringLiteral = '\"([^\"]*(\"\".*?\"\")*[^\"]*)*\"'
+    DateLiteral = '#[0-9/: AMP]*#'
 
 
 class UnknownLexemeException(Exception):
@@ -120,10 +135,20 @@ static_lexeme_definitions: List[StaticLexemeDefinition] = [
     StaticLexemeDefinition(LexemeType.Xor),
     StaticLexemeDefinition(LexemeType.AndAlso),
     StaticLexemeDefinition(LexemeType.OrElse),
+    # Comparison operators
+    StaticLexemeDefinition(LexemeType.Less),
+    StaticLexemeDefinition(LexemeType.LessOrEqual),
+    StaticLexemeDefinition(LexemeType.Greater),
+    StaticLexemeDefinition(LexemeType.GreaterOrEqual),
+    StaticLexemeDefinition(LexemeType.NotEqual),
+    StaticLexemeDefinition(LexemeType.Is),
+    StaticLexemeDefinition(LexemeType.IsNot),
+    StaticLexemeDefinition(LexemeType.Like),
     # Other operators
     StaticLexemeDefinition(LexemeType.Assign),
+    StaticLexemeDefinition(LexemeType.StringConcatenation),
+    # Service symbols
     StaticLexemeDefinition(LexemeType.Semicolon),
-    StaticLexemeDefinition(LexemeType.DoubleQuote),
     StaticLexemeDefinition(LexemeType.Dot),
     StaticLexemeDefinition(LexemeType.Comma),
     StaticLexemeDefinition(LexemeType.OpeningBracket),
@@ -131,7 +156,12 @@ static_lexeme_definitions: List[StaticLexemeDefinition] = [
 ]
 dynamic_lexeme_definitions: List[DynamicLexemeDefinition] = [
     DynamicLexemeDefinition(LexemeType.Identifier),
-    DynamicLexemeDefinition(LexemeType.Number)
+    DynamicLexemeDefinition(LexemeType.Number),
+    DynamicLexemeDefinition(LexemeType.HexadecimalNumber),
+    DynamicLexemeDefinition(LexemeType.BinaryNumber),
+    DynamicLexemeDefinition(LexemeType.OctalNumber),
+    DynamicLexemeDefinition(LexemeType.StringLiteral),
+    DynamicLexemeDefinition(LexemeType.DateLiteral)
 ]
 
 
@@ -188,6 +218,9 @@ class LexicalAnalyzer:
                 continue
 
             span = m.span()
+            if span[0] > self.offset:
+                continue
+
             match_length = span[1] - span[0]
             self.offset += match_length
             return Lexeme(lexeme_type=lexeme_def.lexeme_type, lexeme_value=m.group(0),
